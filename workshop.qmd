@@ -1,0 +1,59 @@
+---
+title: "Haz un mapa web interactivo con tres líneas de código en R "
+format: html
+---
+
+# Lo prometido es deuda...
+
+```{r}
+
+# install.packages("tmap")
+library(tmap)
+tmap_mode("view")
+qtm(World, fill = "HPI")
+
+```
+
+
+```{r}
+
+qtm(World, fill = "HPI", fill.scale = tm_scale_continuous(values = "-brewer.bu_pu"))
+
+```
+
+```{r}
+
+qtm(
+    World, 
+    fill = "HPI", 
+    fill.scale = tm_scale_continuous(values = "brewer.bu_pu"),
+    fill.legend = tm_legend(
+        title = "Happy Planet Index",
+        orientation = "landscape",
+        position = c("center", "bottom"),
+        na.show = FALSE,
+        frame = FALSE
+    )
+)
+
+```
+
+```{r}
+#| include: false
+
+hpi <- qtm(World, fill = "HPI")
+tmap_save(hpi, "hpi.html")
+```
+
+# Ahora empezamos de verdad
+
+```{r}
+
+# Si queremos hacer mapes, no podemos hacerlos sin los básicos
+# install.packages(c("sf", "terra"))
+library(sf)
+library(terra)
+
+
+
+```
