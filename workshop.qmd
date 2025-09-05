@@ -1,11 +1,12 @@
 ---
-title: "Haz un mapa web interactivo con tres líneas de código en R "
+title: "Haz un mapa web interactivo con tres líneas de código en R"
 format: html
 ---
 
 # Lo prometido es deuda...
 
 ```{r}
+#| output: false
 
 # install.packages("tmap")
 library(tmap)
@@ -14,6 +15,14 @@ qtm(World, fill = "HPI")
 
 ```
 
+```{r}
+#| eval: false
+
+qtm(readRDS("data/rios_cat.rds"), col = "ORDRE")
+
+```
+
+<iframe src="rios.html" width="100%" height="500px"></iframe>
 
 ```{r}
 
@@ -39,21 +48,141 @@ qtm(
 ```
 
 ```{r}
-#| include: false
+#| eval: false
 
 hpi <- qtm(World, fill = "HPI")
-tmap_save(hpi, "hpi.html")
+tmap_save(hpi, "docs/hpi.html")
 ```
 
 # Ahora empezamos de verdad
 
+<https://r-tmap.github.io/tmap/articles/foundations_gg>
+
 ```{r}
 
-# Si queremos hacer mapes, no podemos hacerlos sin los básicos
-# install.packages(c("sf", "terra"))
-library(sf)
-library(terra)
-
-
+tm_shape(World) +
+    tm_polygons(
+        fill = "HPI", 
+        fill.scale = tm_scale_continuous(
+            values = cols4all::c4a_palettes()[sample(1:595, 1)]
+            )
+        ) +
+    tm_symbols(size = "gdp_cap_est", fill = "black") +
+    tm_crs("+proj=eqearth")
 
 ```
+
+```{r}
+
+World$size_class <- with(World, ifelse(pop_est > median(pop_est), "Big", "Small"))
+
+tm_shape(World) +
+    tm_polygons(fill = "HPI") +
+    tm_facets("size_class")
+
+```
+
+Si queremos hacer mapas, no podemos hacerlos sin los básicos.
+
+```{r}
+#| eval: false
+
+library(sf)
+library(terra)
+library(dplyr)
+
+archivos <- file.path("data", list.files("data"))
+
+# cargamos todos los archivos en data y los asignamos a una variable con el mismo nombre
+for (archivo in archivos){
+    assign(
+        sub(".rds", "", basename(archivo)), 
+        readRDS(archivo)
+    )
+}
+
+# Simplificamos municipis para reducir tiempo de computación
+munis_cat <- st_simplify(munis_cat, dTolerance = 10, preserveTopology = TRUE)
+
+```
+
+Combinamos un raster con un vectorial
+
+```{r}
+#| eval: false
+
+(usos_suelo <- tm_shape(usos_suelo) +
+        tm_raster() +
+    tm_shape(comarc_cat) +
+        tm_polygons(fill = NULL))
+tmap_save(usos_suelo, "usos-suelo.html")
+```
+
+<iframe src="usos-suelo.html" width="100%" height="500px"></iframe>
+
+Le añadimos un poco de magia
+
+```{r}
+#| eval: false
+#| fig-height: 8
+
+# Contamos frecuencia de usos del suelo por comarca
+usos_comarca <- freq(usos_suelo, zones = vect(comarc_cat))
+
+# Unimos el recuento con el tesaurus de usos
+usos_comarca2 <- usos_comarca |> 
+    left_join(tesaurus_usos, by = join_by("value" == "id")) |> 
+    mutate(
+        perc = paste0(round(count / sum(count) * 100, 1), "%"),
+        .by = zone
+        ) |> 
+    select(coberta, zone, perc)
+
+# Unimos el recuento con la capa de comarcas
+comarc_usos <- comarc_cat |> 
+    select(-c(CODICOMAR, AREACOMAR, DATAALTA)) |> 
+    right_join(usos_comarca2, by = join_by(ID == zone)) |> 
+    tidyr::pivot_wider(names_from = coberta, values_from = perc, values_fill = "0%")
+
+# Extraemos los colores predefinidos en el raster de usos del suelo
+colores <- coltab(usos_suelo)[[1]][2:26, ]
+colores_hex <- rgb(colores$red, colores$green, colores$blue, maxColorValue = 255)
+categorias <- tesaurus_usos$coberta
+
+
+(usos_suelo_leyenda <- tm_shape(usos_suelo) +
+        tm_raster() +
+    tm_shape(comarc_usos) +
+        tm_polygons(fill = NULL) +
+    tm_add_legend(
+        labels = categorias,
+        type = "polygons",
+        fill = colores_hex
+    ))
+tmap_save(usos_suelo_leyenda, "usos-suelo-leyenda.html")
+```
+
+<iframe src="usos-suelo-leyenda.html" width="100%" height="800px"></iframe>
+
+Podemos controlar la visibilidad según el nivel de zoom
+
+```{r}
+#| eval: false
+
+(zoom_control <- tm_shape(munis_cat) +
+        tm_polygons(fill = "AREAPOL", group = "Municipios") +
+        tm_text(text = "NOM_MUNI", group = "Municipios") +
+    tm_shape(comarc_cat) +
+        tm_polygons(fill = "AREACOMAR", group = "Comarcas") +
+        tm_text(text = "NOM_COMAR", group = "Medio") +
+    tm_shape(ciudades_cat) +
+        tm_dots(group = "Comarcas", fill = "darkred") +
+        tm_text(text = "Nom", group = "Comarcas", col = "darkred") +
+    tm_group("Municipios", zoom_levels = 11:20) +
+    tm_group("Comarcas", zoom_levels = 8:10) +
+    tm_group("Medio", zoom_levels = 9:10) +
+    tm_view(set_zoom_limits = c(8, 20)))
+tmap_save(zoom_control, "zoom-control.html")
+```
+
+<iframe src="zoom-control.html" width="100%" height="700px"></iframe>

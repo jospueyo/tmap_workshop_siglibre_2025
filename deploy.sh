@@ -1,0 +1,7 @@
+git checkout gh-pages
+quarto render workshop.qmd --to html -o index.html --output-dir docs
+cp *.html docs
+git add docs/*
+git commit -m "Deploy index.html"
+git push origin gh-pages
+git checkout main
