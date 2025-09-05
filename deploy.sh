@@ -1,4 +1,5 @@
 git checkout gh-pages
+git merge main
 quarto render workshop.qmd --to html -o index.html --output-dir docs
 cp maps/*.html docs
 git add docs/*
