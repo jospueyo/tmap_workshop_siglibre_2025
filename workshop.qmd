@@ -51,7 +51,7 @@ qtm(
 #| eval: false
 
 hpi <- qtm(World, fill = "HPI")
-tmap_save(hpi, "docs/hpi.html")
+tmap_save(hpi, "hpi.html")
 ```
 
 # Ahora empezamos de verdad
