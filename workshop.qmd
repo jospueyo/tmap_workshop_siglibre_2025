@@ -51,7 +51,7 @@ qtm(
 #| eval: false
 
 hpi <- qtm(World, fill = "HPI")
-tmap_save(hpi, "hpi.html")
+tmap_save(hpi, "maps/hpi.html")
 ```
 
 # Ahora empezamos de verdad
@@ -115,7 +115,7 @@ Combinamos un raster con un vectorial
         tm_raster() +
     tm_shape(comarc_cat) +
         tm_polygons(fill = NULL))
-tmap_save(usos_suelo, "usos-suelo.html")
+tmap_save(usos_suelo, "maps/usos-suelo.html")
 ```
 
 <iframe src="usos-suelo.html" width="100%" height="500px"></iframe>
@@ -159,7 +159,7 @@ categorias <- tesaurus_usos$coberta
         type = "polygons",
         fill = colores_hex
     ))
-tmap_save(usos_suelo_leyenda, "usos-suelo-leyenda.html")
+tmap_save(usos_suelo_leyenda, "maps/usos-suelo-leyenda.html")
 ```
 
 <iframe src="usos-suelo-leyenda.html" width="100%" height="800px"></iframe>
@@ -182,7 +182,7 @@ Podemos controlar la visibilidad según el nivel de zoom
     tm_group("Comarcas", zoom_levels = 8:10) +
     tm_group("Medio", zoom_levels = 9:10) +
     tm_view(set_zoom_limits = c(8, 20)))
-tmap_save(zoom_control, "zoom-control.html")
+tmap_save(zoom_control, "maps/zoom-control.html")
 ```
 
 <iframe src="zoom-control.html" width="100%" height="700px"></iframe>
