@@ -229,7 +229,11 @@ tmap_animation(evol_pobl, delay = 100, "maps/evol-poblacion.gif", width = 800, h
 
 ```
 
+<<<<<<< HEAD
 [](docs/evol-poblacion.gif)
+=======
+[](evol-poblacion.gif)
+>>>>>>> main
 
 Ahora falseamos la evolución de la población para ver mejor el efecto de la animacion
 
@@ -251,4 +255,8 @@ tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800
 
 ```
 
+<<<<<<< HEAD
 ![](docs/evol-falseada.gif)
+=======
+![](evol-falseada.gif)
+>>>>>>> main
