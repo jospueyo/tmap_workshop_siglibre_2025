@@ -94,7 +94,6 @@ tm_shape(World) +
 Si queremos hacer mapas, no podemos hacerlos sin los básicos.
 
 ```{r}
-#| eval: false
 
 library(sf)
 library(terra)
@@ -215,7 +214,7 @@ poblacion <- tibble(
     poblacion = value
 )
 
-evol_poblacion <- munis_cat |> 
+munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     tm_shape() +
     tm_polygons(
@@ -224,16 +223,13 @@ evol_poblacion <- munis_cat |>
         ) +
     tm_animate(by = "ano")
 
-tmap_animation(evol_poblacion, delay = 100)
-
-
 ```
 
 Ahora falseamos la evolución de la población para ver mejor el efecto de la animacion
 
 ```{r}
 
-evol_falseada <- munis_cat |> 
+(evol_pobl <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     mutate(poblacion_falseada = rep(sample(1:10, n(), replace = TRUE)),
         evolucion = poblacion_falseada + as.numeric(ano)
@@ -244,7 +240,17 @@ evol_falseada <- munis_cat |>
         fill.scale = tm_scale_continuous(values = "brewer.bu_pu"),
         ) +
     tm_animate(by = "ano")
-
-tmap_animation(evol_falseada, delay = 100)
+)
 
 ```
+
+También podem guardar la animación como un gif e insertarlo en cualquier lugar.
+
+```{r}
+#| eval: false
+
+tmap_animation(evol_poblacion, delay = 100, "maps/evol_poblacion.gif", width = 800, height = 600)
+
+```
+
+![evol_poblacion]("docs/evol_poblacion.gif")
