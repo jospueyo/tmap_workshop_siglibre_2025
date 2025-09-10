@@ -32,7 +32,7 @@ qtm(World, fill = "HPI", fill.scale = tm_scale_continuous(values = "-brewer.bu_p
 
 ```{r}
 
-qtm(
+(hpi_world <- qtm(
     World, 
     fill = "HPI", 
     fill.scale = tm_scale_continuous(values = "brewer.bu_pu"),
@@ -43,15 +43,14 @@ qtm(
         na.show = FALSE,
         frame = FALSE
     )
-)
+))
 
 ```
 
 ```{r}
 #| eval: false
 
-hpi <- qtm(World, fill = "HPI")
-tmap_save(hpi, "maps/hpi.html")
+tmap_save(hpi_world, "maps/hpi.html")
 ```
 
 # Ahora empezamos de verdad
@@ -61,16 +60,26 @@ tmap_save(hpi, "maps/hpi.html")
 ```{r}
 
 tm_shape(World) +
+    # tm_crs("+proj=eqearth") +
     tm_polygons(
         fill = "HPI", 
         fill.scale = tm_scale_continuous(
             values = cols4all::c4a_palettes()[sample(1:595, 1)]
             )
-        ) +
-    tm_symbols(size = "gdp_cap_est", fill = "black") +
-    tm_crs("+proj=eqearth")
+        )
+    # tm_grid()
+    # tm_symbols(size = "gdp_cap_est", fill = "black") + 
+    # tm_basemap(leaflet::providers$Stadia.StamenWatercolor) +
+    # tm_scalebar(position = c("left", "bottom")) +
+    # tm_logo(
+    #     file = "https://www.jornadassiglibre.org/wp-content/uploads/2024/10/SIGLIBRE-motiu.png",
+    #     height = 3,
+    #     position = c("right", "top")
+    #     )
 
 ```
+
+https://leaflet-extras.github.io/leaflet-providers/preview/
 
 ```{r}
 
@@ -186,3 +195,56 @@ tmap_save(zoom_control, "maps/zoom-control.html")
 ```
 
 <iframe src="zoom-control.html" width="100%" height="700px"></iframe>
+
+Aunque no son mapas web interactivos, también podemos crear animaciones.
+
+
+```{r}
+
+pob_json <- jsonlite::read_json("https://api.idescat.cat/taules/v2/pmh/446/477/mun/data?YEAR=1999,2004,2009,2014,2019,2024&SEX=TOTAL")
+
+# Convertimos NULL a NA para no perder dats con unlist
+pob_json$value[sapply(pob_json$value, is.null)] <- NA
+value <- unlist(pob_json$value)
+years <- unlist(pob_json$dimension$YEAR$category$index)
+munis <- unlist(pob_json$dimension$MUN$category$index)
+
+poblacion <- tibble(
+    municipio = rep(munis, length(years)),
+    ano = rep(years, each = length(munis)),
+    poblacion = value
+)
+
+evol_poblacion <- munis_cat |> 
+    left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
+    tm_shape() +
+    tm_polygons(
+        fill = "poblacion", 
+        fill.scale = tm_scale_continuous_log10(values = "brewer.bu_pu"),
+        ) +
+    tm_animate(by = "ano")
+
+tmap_animation(evol_poblacion, delay = 100)
+
+
+```
+
+Ahora falseamos la evolución de la población para ver mejor el efecto de la animacion
+
+```{r}
+
+evol_falseada <- munis_cat |> 
+    left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
+    mutate(poblacion_falseada = rep(sample(1:10, n(), replace = TRUE)),
+        evolucion = poblacion_falseada + as.numeric(ano)
+    ) |> 
+    tm_shape() +
+    tm_polygons(
+        fill = "evolucion", 
+        fill.scale = tm_scale_continuous(values = "brewer.bu_pu"),
+        ) +
+    tm_animate(by = "ano")
+
+tmap_animation(evol_falseada, delay = 100)
+
+```
