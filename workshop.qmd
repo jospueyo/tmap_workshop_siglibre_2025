@@ -214,7 +214,7 @@ poblacion <- tibble(
     poblacion = value
 )
 
-munis_cat |> 
+evol_pobl <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     tm_shape() +
     tm_polygons(
@@ -223,13 +223,19 @@ munis_cat |>
         ) +
     tm_animate(by = "ano")
 
+# Para incluirla en un documento quarto, debemos guardarla como gif (hay otras formas, pero son más complicadas)
+
+tmap_animation(evol_pobl, delay = 100, "maps/evol-poblacion.gif", width = 800, height = 600)
+
 ```
+
+[](docs/evol-poblacion.gif)
 
 Ahora falseamos la evolución de la población para ver mejor el efecto de la animacion
 
 ```{r}
 
-(evol_pobl <- munis_cat |> 
+evol_falseada <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     mutate(poblacion_falseada = rep(sample(1:10, n(), replace = TRUE)),
         evolucion = poblacion_falseada + as.numeric(ano)
@@ -240,17 +246,9 @@ Ahora falseamos la evolución de la población para ver mejor el efecto de la an
         fill.scale = tm_scale_continuous(values = "brewer.bu_pu"),
         ) +
     tm_animate(by = "ano")
-)
+
+tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800, height = 600)
 
 ```
 
-También podem guardar la animación como un gif e insertarlo en cualquier lugar.
-
-```{r}
-#| eval: false
-
-tmap_animation(evol_poblacion, delay = 100, "maps/evol_poblacion.gif", width = 800, height = 600)
-
-```
-
-![evol_poblacion]("docs/evol_poblacion.gif")
+![](docs/evol-falseada.gif)
