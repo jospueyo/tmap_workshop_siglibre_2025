@@ -243,7 +243,6 @@ Ahora falseamos la evolución de la población para ver mejor el efecto de la an
 #| eval: false
 
 evol_falseada <- munis_cat |> 
-evol_falseada <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     mutate(poblacion_falseada = rep(sample(1:10, n(), replace = TRUE)),
         evolucion = poblacion_falseada + as.numeric(ano)
@@ -255,7 +254,6 @@ evol_falseada <- munis_cat |>
         ) +
     tm_animate(by = "ano")
 
-tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800, height = 600)
 tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800, height = 600)
 
 ```
