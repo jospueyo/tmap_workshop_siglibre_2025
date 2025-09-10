@@ -199,6 +199,7 @@ Aunque no son mapas web interactivos, también podemos crear animaciones.
 
 
 ```{r}
+#| eval: false
 
 pob_json <- jsonlite::read_json("https://api.idescat.cat/taules/v2/pmh/446/477/mun/data?YEAR=1999,2004,2009,2014,2019,2024&SEX=TOTAL")
 
@@ -215,6 +216,7 @@ poblacion <- tibble(
 )
 
 evol_pobl <- munis_cat |> 
+evol_pobl <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     tm_shape() +
     tm_polygons(
@@ -227,18 +229,20 @@ evol_pobl <- munis_cat |>
 
 tmap_animation(evol_pobl, delay = 100, "maps/evol-poblacion.gif", width = 800, height = 600)
 
+# Para incluirla en un documento quarto, debemos guardarla como gif (hay otras formas, pero son más complicadas)
+
+tmap_animation(evol_pobl, delay = 100, "maps/evol-poblacion.gif", width = 800, height = 600)
+
 ```
 
-<<<<<<< HEAD
-[](docs/evol-poblacion.gif)
-=======
 [](evol-poblacion.gif)
->>>>>>> main
 
 Ahora falseamos la evolución de la población para ver mejor el efecto de la animacion
 
 ```{r}
+#| eval: false
 
+evol_falseada <- munis_cat |> 
 evol_falseada <- munis_cat |> 
     left_join(poblacion, by = join_by(MUNICIPI == municipio)) |>
     mutate(poblacion_falseada = rep(sample(1:10, n(), replace = TRUE)),
@@ -252,11 +256,8 @@ evol_falseada <- munis_cat |>
     tm_animate(by = "ano")
 
 tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800, height = 600)
+tmap_animation(evol_falseada, delay = 100, "maps/evol-falseada.gif", width = 800, height = 600)
 
 ```
 
-<<<<<<< HEAD
-![](docs/evol-falseada.gif)
-=======
 ![](evol-falseada.gif)
->>>>>>> main
