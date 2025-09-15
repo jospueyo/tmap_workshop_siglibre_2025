@@ -17,8 +17,8 @@ qtm(World, fill = "HPI")
 
 ```{r}
 #| eval: false
-
-qtm(readRDS("data/rios_cat.rds"), col = "ORDRE")
+rios <- readRDS("data/rios_cat.rds")
+qtm(rios, col = "ORDRE")
 
 ```
 
@@ -45,6 +45,9 @@ qtm(World, fill = "HPI", fill.scale = tm_scale_continuous(values = "-brewer.bu_p
     )
 ))
 
+## Consultar paletas disponibles
+# cols4all::c4a_gui()
+# cols4all::c4a_palettes()
 ```
 
 ```{r}
